@@ -364,7 +364,7 @@ export default function Portfolio() {
               marginBottom: "2.5rem",
             }}
           >
-            Middle AI engineer and full-stack developer focused on intelligent systems — LLM pipelines, Telegram bots, blockchain integrations, and the infrastructure holding it all together.
+            Middle AI engineer and full-stack developer focused on intelligent systems LLM pipelines, Telegram bots, blockchain integrations, and the infrastructure holding it all together.
           </p>
 
           <div className="hero-links" style={{ display: "flex", gap: "2rem", alignItems: "center" }}>
@@ -383,7 +383,7 @@ export default function Portfolio() {
             </a>
 
             <span style={{ width: "1px", height: "14px", background: "#202020" }} />
-            <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "10px", color: "#333" }}>Palu, Indonesia</span>
+            <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "10px", color: "#333" }}>jakarta, Indonesia</span>
           </div>
         </div>
 
