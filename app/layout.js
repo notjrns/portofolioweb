@@ -12,7 +12,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Notjrnss web",
+  title: "Notjrnss person",
   description: "AI Engineer/Fullstack dev",
 };
 
