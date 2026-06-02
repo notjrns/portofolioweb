@@ -20,6 +20,9 @@
 # production
 /build
 
+# local media previews are hosted externally in production
+/public/videos/
+
 # misc
 .DS_Store
 *.pem

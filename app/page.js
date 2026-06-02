@@ -210,7 +210,7 @@ const WORK_ITEMS = [
     title: "Telegram Automation",
     summary: "Conversation flows, inline keyboards, webhook handling, and task automation built for real users.",
     stack: ["Telegraf", "Telethon", "Python"],
-    media: "/videos/bot-preview.mp4",
+    media: "https://res.cloudinary.com/dvazzokyi/video/upload/v1780389784/Screen_Recording_20260602_142313_Telegram_vcxnqv.mp4",
     accent: "#50C6B8",
   },
   {
