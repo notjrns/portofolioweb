@@ -100,11 +100,13 @@ function CodeAnimation() {
       return () => clearTimeout(t);
     }
 
-    setLines((prev) => {
-      const next = [...prev];
-      next[lineIdx] = { tokens: tokenize(currentLine || "\u00a0"), done: true };
-      return next;
-    });
+    const doneTimer = setTimeout(() => {
+      setLines((prev) => {
+        const next = [...prev];
+        next[lineIdx] = { tokens: tokenize(currentLine || "\u00a0"), done: true };
+        return next;
+      });
+    }, 0);
 
     if (lineIdx < CODE_LINES.length - 1) {
       const t = setTimeout(() => {
@@ -117,12 +119,16 @@ function CodeAnimation() {
         }
       }, 55);
 
-      return () => clearTimeout(t);
+      return () => {
+        clearTimeout(doneTimer);
+        clearTimeout(t);
+      };
     }
 
+    let resetTimer;
     const t = setTimeout(() => {
       setRestarting(true);
-      setTimeout(() => {
+      resetTimer = setTimeout(() => {
         setLines([{ tokens: [{ text: "", color: "#C0C0C0" }], done: false }]);
         setLineIdx(0);
         setCharIdx(0);
@@ -130,7 +136,11 @@ function CodeAnimation() {
       }, 700);
     }, 3000);
 
-    return () => clearTimeout(t);
+    return () => {
+      clearTimeout(doneTimer);
+      clearTimeout(t);
+      clearTimeout(resetTimer);
+    };
   }, [lineIdx, charIdx, restarting]);
 
   return (
@@ -192,10 +202,273 @@ function CodeAnimation() {
   );
 }
 
+const WORK_ITEMS = [
+  {
+    label: "Telegram Bots",
+    scope: "Bot Demo",
+    year: "2026",
+    title: "Telegram Automation",
+    summary: "Conversation flows, inline keyboards, webhook handling, and task automation built for real users.",
+    stack: ["Telegraf", "Telethon", "Python"],
+    media: "/videos/bot-preview.mp4",
+    accent: "#50C6B8",
+  },
+  {
+    label: "LLM Systems",
+    scope: "AI Pipeline",
+    year: "2026",
+    title: "Production AI Systems",
+    summary: "RAG pipelines, agent workflows, prompt evaluation, and model integrations built for product usage.",
+    stack: ["OpenAI APIs", "RAG", "Agents"],
+    accent: "#7B8CDE",
+  },
+  {
+    label: "Full Stack",
+    scope: "Web Runtime",
+    year: "2025",
+    title: "Next.js Systems",
+    summary: "App router interfaces, API surfaces, server-side workflows, and infrastructure around product logic.",
+    stack: ["Next.js", "React", "Node.js"],
+    accent: "#A8B3FF",
+  },
+  {
+    label: "Web3",
+    scope: "Blockchain",
+    year: "2025",
+    title: "On-chain Integrations",
+    summary: "Wallet authentication, smart contract interaction, transaction orchestration, and multi-chain tooling.",
+    stack: ["Ethers.js", "Viem", "DeFi"],
+    accent: "#E8D9A0",
+  },
+];
+
+function PortfolioShowcase() {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [motion, setMotion] = useState({ rotateX: 2, rotateY: -6, bgX: 0, bgY: 0 });
+  const stageRef = useRef(null);
+  const active = WORK_ITEMS[activeIndex];
+
+  const updateMotion = (clientX, clientY) => {
+    const rect = stageRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    const x = (clientX - rect.left) / rect.width - 0.5;
+    const y = (clientY - rect.top) / rect.height - 0.5;
+    const compact = rect.width < 760;
+
+    setMotion({
+      rotateX: (compact ? 0 : 2) - y * (compact ? 4 : 6),
+      rotateY: (compact ? 0 : -6) + x * (compact ? 5 : 9),
+      bgX: x * 16,
+      bgY: y * 12,
+    });
+  };
+
+  const resetMotion = () => {
+    const compact = stageRef.current?.getBoundingClientRect().width < 760;
+    setMotion({ rotateX: compact ? 0 : 2, rotateY: compact ? 0 : -6, bgX: 0, bgY: 0 });
+  };
+
+  return (
+    <div
+      ref={stageRef}
+      className="portfolio-stage hero-portfolio"
+      onPointerMove={(e) => updateMotion(e.clientX, e.clientY)}
+      onTouchMove={(e) => {
+        const touch = e.touches[0];
+        if (touch) updateMotion(touch.clientX, touch.clientY);
+      }}
+      onPointerLeave={resetMotion}
+      onTouchEnd={resetMotion}
+      role="region"
+      aria-label="Interactive portfolio preview"
+      style={{
+        animation: "heroIn 1s cubic-bezier(.22,1,.36,1) 0.18s both",
+        position: "relative",
+        minHeight: "clamp(360px, 54vh, 470px)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        perspective: "1400px",
+        overflow: "visible",
+        touchAction: "pan-y",
+      }}
+    >
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: "-10%",
+          borderRadius: "2rem",
+          background:
+            "linear-gradient(115deg, rgba(255,255,255,0.08), transparent 46%), repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 70px), repeating-linear-gradient(0deg, rgba(255,255,255,0.022) 0 1px, transparent 1px 70px)",
+          filter: "blur(4px)",
+          opacity: 0.64,
+          transform: `translate(${motion.bgX}px, ${motion.bgY}px) scale(1.04)`,
+          transition: "transform 120ms ease-out",
+        }}
+      />
+
+      <div
+        className="portfolio-frame"
+        style={{
+          position: "relative",
+          zIndex: 1,
+          width: "min(460px, 100%)",
+          padding: "0.72rem",
+          borderRadius: "1.35rem",
+          border: "1px solid rgba(255,255,255,0.18)",
+          background: "linear-gradient(135deg, rgba(255,255,255,0.14), rgba(255,255,255,0.035))",
+          backdropFilter: "blur(18px)",
+          WebkitBackdropFilter: "blur(18px)",
+          boxShadow: "0 34px 72px rgba(0,0,0,0.54), inset 0 1px 0 rgba(255,255,255,0.16)",
+          transformStyle: "preserve-3d",
+          transform: `rotateY(${motion.rotateY}deg) rotateX(${motion.rotateX}deg) scale(0.98)`,
+          transition: "transform 120ms ease-out",
+        }}
+      >
+        <div className="portfolio-tabs" style={{ display: "grid", gridTemplateColumns: `repeat(${WORK_ITEMS.length}, minmax(0, 1fr))`, gap: "0.35rem", marginBottom: "0.65rem", transform: "translateZ(26px)" }}>
+          {WORK_ITEMS.map((item, index) => {
+            const selected = index === activeIndex;
+            return (
+              <button
+                key={item.label}
+                type="button"
+                aria-pressed={selected}
+                onClick={() => setActiveIndex(index)}
+                onFocus={() => setActiveIndex(index)}
+                style={{
+                  minHeight: "34px",
+                  border: selected ? "1px solid rgba(255,255,255,0.28)" : "1px solid rgba(255,255,255,0.07)",
+                  borderRadius: "0.72rem",
+                  background: selected ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.10)",
+                  color: selected ? "#F5F5F5" : "rgba(255,255,255,0.48)",
+                  fontFamily: "'JetBrains Mono',monospace",
+                  fontSize: "8px",
+                  cursor: "pointer",
+                  transition: "all 180ms ease",
+                }}
+              >
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
+
+        <div
+          className="portfolio-preview"
+          style={{
+            position: "relative",
+            overflow: "hidden",
+            aspectRatio: active.media ? "auto" : "9 / 16",
+            width: "min(255px, 100%)",
+            margin: "0 auto",
+            borderRadius: active.media ? "0.72rem" : "1rem",
+            border: active.media ? "0" : "1px solid rgba(255,255,255,0.12)",
+            background: active.media ? "transparent" : `linear-gradient(135deg, ${active.accent}2F, rgba(0,0,0,0.42))`,
+            boxShadow: active.media ? "none" : "0 22px 48px rgba(0,0,0,0.46), inset 0 1px 0 rgba(255,255,255,0.12)",
+            transform: "translateZ(46px)",
+          }}
+        >
+          {active.media ? (
+            <video
+              src={active.media}
+              muted
+              loop
+              autoPlay
+              playsInline
+              preload="metadata"
+              style={{ width: "100%", height: "auto", objectFit: "contain", display: "block", opacity: 0.96, background: "transparent", borderRadius: "0.72rem" }}
+            />
+          ) : (
+            <div style={{ position: "absolute", inset: 0, display: "grid", placeItems: "center", backgroundImage: "linear-gradient(90deg, rgba(255,255,255,0.055) 1px, transparent 1px), linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px)", backgroundSize: "62px 62px" }}>
+              <div style={{ width: "72%", display: "grid", gap: "0.7rem" }}>
+                {active.stack.map((item, index) => (
+                  <span key={item} style={{ padding: "0.85rem 1rem", borderRadius: "0.85rem", border: "1px solid rgba(255,255,255,0.10)", background: "rgba(0,0,0,0.18)", color: "rgba(255,255,255,0.78)", fontFamily: "'JetBrains Mono',monospace", fontSize: "10px", transform: `translateX(${index * 16}px)` }}>
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {!active.media ? (
+            <>
+              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(0,0,0,0.08), transparent 46%, rgba(0,0,0,0.58))", pointerEvents: "none" }} />
+              <div style={{ position: "absolute", left: "0.8rem", right: "0.8rem", bottom: "0.8rem", display: "flex", alignItems: "end", justifyContent: "space-between", gap: "0.8rem" }}>
+                <div>
+                  <span style={{ display: "block", fontFamily: "'JetBrains Mono',monospace", fontSize: "9px", color: "rgba(255,255,255,0.58)", letterSpacing: "0.12em", marginBottom: "0.45rem" }}>
+                    {active.scope}
+                  </span>
+                  <strong style={{ display: "block", fontFamily: "'Space Grotesk',sans-serif", fontSize: "clamp(1rem,1.7vw,1.25rem)", lineHeight: 1, color: "#F4F4F4" }}>{active.title}</strong>
+                </div>
+                <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "10px", color: "rgba(255,255,255,0.68)" }}>{active.year}</span>
+              </div>
+            </>
+          ) : null}
+        </div>
+
+        <div className="portfolio-meta" style={{ display: "grid", gridTemplateColumns: "1fr", alignItems: "center", gap: "0.7rem", padding: "0.75rem 0.25rem 0.05rem", transform: "translateZ(30px)" }}>
+          <p style={{ margin: 0, fontFamily: "'DM Sans',sans-serif", fontWeight: 300, fontSize: "11.5px", lineHeight: 1.55, color: "rgba(255,255,255,0.54)" }}>{active.summary}</p>
+          <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap" }}>
+            {active.stack.map((item) => (
+              <span key={item} style={{ border: "1px solid rgba(255,255,255,0.10)", borderRadius: "999px", padding: "0.35rem 0.55rem", fontFamily: "'JetBrains Mono',monospace", fontSize: "8.5px", color: "rgba(255,255,255,0.60)" }}>
+                {item}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CodeWindow() {
+  return (
+    <div
+      style={{
+        animation: "heroIn 1s cubic-bezier(.22,1,.36,1) 0.18s both",
+        position: "relative",
+        minWidth: 0,
+        maxWidth: "100%",
+        overflow: "hidden",
+      }}
+      className="code-win"
+    >
+      <div style={{ position: "absolute", inset: "-60px", background: "radial-gradient(ellipse at center, #7B8CDE08 0%, transparent 68%)", pointerEvents: "none" }} />
+
+      <div
+        className="code-shell"
+        style={{
+          background: "#0D0D0D",
+          border: "1px solid #1C1C1C",
+          borderRadius: "3px",
+          overflow: "hidden",
+          boxShadow: "0 48px 96px rgba(0,0,0,0.7)",
+        }}
+      >
+        <div style={{ padding: "9px 14px", background: "#111", borderBottom: "1px solid #1A1A1A", display: "flex", alignItems: "center", gap: "7px" }}>
+          {[0, 1, 2].map((i) => (
+            <div key={i} style={{ width: 9, height: 9, borderRadius: "50%", background: "#222" }} />
+          ))}
+          <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "9px", color: "#2E2E2E", marginLeft: "8px" }}>notjrnss / main.ts</span>
+        </div>
+
+        <div className="code-inner" style={{ padding: "1.4rem 1.2rem", height: "clamp(240px,38vh,460px)", overflow: "hidden", position: "relative" }}>
+          <CodeAnimation />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Portfolio() {
   const [scrolled, setScrolled] = useState(false);
   const [visible, setVisible] = useState({});
-  const refs = useRef({});
+  const stackRef = useRef(null);
+  const telegramRef = useRef(null);
+  const aiRef = useRef(null);
+  const contactRef = useRef(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
@@ -212,13 +485,9 @@ export default function Portfolio() {
       { threshold: 0.1 }
     );
 
-    Object.values(refs.current).forEach((el) => el && obs.observe(el));
+    [stackRef, telegramRef, aiRef, contactRef].forEach((ref) => ref.current && obs.observe(ref.current));
     return () => obs.disconnect();
   }, []);
-
-  const reg = (key) => (el) => {
-    refs.current[key] = el;
-  };
 
   const fi = (key, delay = 0) => ({
     opacity: visible[key] ? 1 : 0,
@@ -248,14 +517,39 @@ export default function Portfolio() {
         .split,
         .code-win,
         .code-shell,
-        .code-inner{min-width:0;max-width:100%}
+        .code-inner,
+        .portfolio-stage,
+        .portfolio-frame,
+        .portfolio-preview,
+        .portfolio-tabs,
+        .portfolio-meta{min-width:0;max-width:100%}
 
         @media(max-width:760px){
           .split{grid-template-columns:1fr !important}
-          .hero-grid{grid-template-columns:1fr !important;gap:2rem !important;align-items:start !important}
+          .hero-grid{grid-template-columns:minmax(0,.98fr) minmax(122px,.72fr) !important;gap:clamp(.35rem,2vw,.75rem) !important;align-items:center !important;align-content:start !important;min-height:auto !important;padding-top:clamp(82px,16vw,96px) !important;padding-bottom:clamp(1.8rem,6vw,2.6rem) !important}
+          .hero-copy-block{min-width:0 !important}
+          .hero-kicker{margin-bottom:1.15rem !important}
+          .hero-kicker span:last-child{font-size:8px !important;letter-spacing:.14em !important}
+          .hero-title{font-size:clamp(2.1rem,10vw,3.35rem) !important;line-height:.92 !important;margin-bottom:1rem !important}
+          .hero-summary{font-size:clamp(.68rem,2.45vw,.82rem) !important;line-height:1.68 !important;max-width:225px !important;margin-bottom:1.35rem !important}
           .code-win{width:100% !important;max-width:100% !important;min-width:0 !important;overflow:hidden !important;height:auto !important}
           .code-inner{height:300px !important;padding:1rem .8rem !important}
-          .hero-links{gap:1rem !important;flex-wrap:wrap !important}
+          .hero-links{gap:.7rem !important;flex-wrap:wrap !important}
+          .hero-links > span:last-child{display:none !important}
+          .hero-portfolio{width:100% !important;min-height:auto !important;justify-content:flex-end !important}
+          .portfolio-frame{width:100% !important;margin-left:auto !important;border-radius:1rem !important;padding:.45rem !important;transform:none !important}
+          .portfolio-tabs{display:flex !important;gap:.25rem !important;margin-bottom:.4rem !important;overflow:hidden !important}
+          .portfolio-tabs button{min-height:24px !important;min-width:0 !important;padding:0 .35rem !important;border-radius:.55rem !important;font-size:7px !important}
+          .portfolio-tabs button:not([aria-pressed="true"]){display:none !important}
+          .portfolio-preview{width:min(128px,100%) !important;border-radius:.72rem !important}
+          .portfolio-meta{display:none !important}
+        }
+
+        @media(max-width:420px){
+          .hero-grid{grid-template-columns:minmax(0,1fr) minmax(108px,.58fr) !important;gap:.3rem !important}
+          .hero-title{font-size:clamp(1.95rem,9.6vw,2.6rem) !important}
+          .hero-summary{font-size:.66rem !important;line-height:1.62 !important;max-width:210px !important}
+          .portfolio-preview{width:min(112px,100%) !important}
         }
       `}</style>
 
@@ -327,8 +621,8 @@ export default function Portfolio() {
         }}
         className="hero-grid"
       >
-        <div style={{ animation: "heroIn 1s cubic-bezier(.22,1,.36,1) both", minWidth: 0 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "1.8rem" }}>
+        <div className="hero-copy-block" style={{ animation: "heroIn 1s cubic-bezier(.22,1,.36,1) both", minWidth: 0 }}>
+          <div className="hero-kicker" style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "1.8rem" }}>
             <span style={{ width: "28px", height: "1px", background: "#7B8CDE" }} />
             <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "10px", color: "#7B8CDE", letterSpacing: "0.18em" }}>
               AI ENGINEER / FULL STACK
@@ -336,6 +630,7 @@ export default function Portfolio() {
           </div>
 
           <h1
+            className="hero-title"
             style={{
               fontFamily: "'Space Grotesk',sans-serif",
               fontWeight: 800,
@@ -354,6 +649,7 @@ export default function Portfolio() {
           </h1>
 
           <p
+            className="hero-summary"
             style={{
               fontFamily: "'DM Sans',sans-serif",
               fontWeight: 300,
@@ -387,45 +683,22 @@ export default function Portfolio() {
           </div>
         </div>
 
-        {/* Code window */}
-        <div
-          style={{
-            animation: "heroIn 1s cubic-bezier(.22,1,.36,1) 0.18s both",
-            position: "relative",
-            minWidth: 0,
-            maxWidth: "100%",
-            overflow: "hidden",
-          }}
-          className="code-win"
-        >
-          <div style={{ position: "absolute", inset: "-60px", background: "radial-gradient(ellipse at center, #7B8CDE08 0%, transparent 68%)", pointerEvents: "none" }} />
+        <PortfolioShowcase />
+      </section>
 
-          <div
-            className="code-shell"
-            style={{
-              background: "#0D0D0D",
-              border: "1px solid #1C1C1C",
-              borderRadius: "3px",
-              overflow: "hidden",
-              boxShadow: "0 48px 96px rgba(0,0,0,0.7)",
-            }}
-          >
-            <div style={{ padding: "9px 14px", background: "#111", borderBottom: "1px solid #1A1A1A", display: "flex", alignItems: "center", gap: "7px" }}>
-              {[0, 1, 2].map((i) => (
-                <div key={i} style={{ width: 9, height: 9, borderRadius: "50%", background: "#222" }} />
-              ))}
-              <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "9px", color: "#2E2E2E", marginLeft: "8px" }}>notjrnss / main.ts</span>
-            </div>
-
-            <div className="code-inner" style={{ padding: "1.4rem 1.2rem", height: "clamp(240px,38vh,460px)", overflow: "hidden", position: "relative" }}>
-              <CodeAnimation />
-            </div>
+      {/* TERMINAL */}
+      <section style={{ padding: `clamp(4.5rem,8vw,7rem) ${PX}`, borderTop: "1px solid #121212", background: "#080808" }}>
+        <div style={{ maxWidth: "980px", margin: "0 auto" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "2.2rem" }}>
+            <span style={{ width: "28px", height: "1px", background: "#7B8CDE" }} />
+            <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "10px", color: "#7B8CDE", letterSpacing: "0.18em" }}>SYSTEM TRACE</span>
           </div>
+          <CodeWindow />
         </div>
       </section>
 
       {/* STACK */}
-      <section data-sid="stack" ref={reg("stack")} style={{ padding: `clamp(5rem,10vw,9rem) ${PX}`, maxWidth: "1380px", margin: "0 auto" }}>
+      <section data-sid="stack" ref={stackRef} style={{ padding: `clamp(5rem,10vw,9rem) ${PX}`, maxWidth: "1380px", margin: "0 auto" }}>
         <div style={fi("stack")}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "4.5rem" }}>
             <span style={{ width: "28px", height: "1px", background: "#7B8CDE" }} />
@@ -486,7 +759,7 @@ export default function Portfolio() {
       </section>
 
       {/* TELEGRAM */}
-      <section data-sid="tg" ref={reg("tg")} style={{ padding: `clamp(4.5rem,9vw,8rem) ${PX}`, borderTop: "1px solid #121212", borderBottom: "1px solid #121212", background: "#0B0B0B" }}>
+      <section data-sid="tg" ref={telegramRef} style={{ padding: `clamp(4.5rem,9vw,8rem) ${PX}`, borderTop: "1px solid #121212", borderBottom: "1px solid #121212", background: "#0B0B0B" }}>
         <div style={{ maxWidth: "1380px", margin: "0 auto", ...fi("tg") }}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "4.5rem" }}>
             <span style={{ width: "28px", height: "1px", background: "#50C6B8" }} />
@@ -525,7 +798,7 @@ export default function Portfolio() {
       </section>
 
       {/* AI + WEB3 */}
-      <section data-sid="ai" ref={reg("ai")} style={{ padding: `clamp(5rem,10vw,9rem) ${PX}`, maxWidth: "1380px", margin: "0 auto" }}>
+      <section data-sid="ai" ref={aiRef} style={{ padding: `clamp(5rem,10vw,9rem) ${PX}`, maxWidth: "1380px", margin: "0 auto" }}>
         <div style={fi("ai")}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "4.5rem" }}>
             <span style={{ width: "28px", height: "1px", background: "#7B8CDE" }} />
@@ -569,13 +842,13 @@ export default function Portfolio() {
       </section>
 
       {/* FOOTER */}
-      <footer data-sid="contact" ref={reg("contact")} style={{ padding: `clamp(5rem,10vw,9rem) ${PX}`, borderTop: "1px solid #121212", background: "#070707" }}>
+      <footer data-sid="contact" ref={contactRef} style={{ padding: `clamp(5rem,10vw,9rem) ${PX}`, borderTop: "1px solid #121212", background: "#070707" }}>
         <div style={{ maxWidth: "1380px", margin: "0 auto" }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "clamp(2.5rem,6vw,7rem)", alignItems: "end", ...fi("contact") }} className="split">
             <div>
               <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "10px", color: "#252525", letterSpacing: "0.18em" }}>AVAILABLE FOR PROJECTS</span>
               <h2 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: "clamp(2.6rem,5.5vw,4.8rem)", color: "#EBEBEB", lineHeight: 0.93, letterSpacing: "-0.025em", margin: "1.4rem 0 1rem" }}>
-                Let's build
+                Let&apos;s build
                 <br />
                 something.
               </h2>
